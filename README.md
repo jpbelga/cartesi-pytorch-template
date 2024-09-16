@@ -5,7 +5,7 @@ The application entrypoint is the `dapp.py` file.
 
 ## How to use it
 1. Replace the simple_nn.onnx file by the model you've trained
-2. Change the MODEL_INPUT_SHAPE variable to conform to your input shape specification
+2. Change the MODEL_INPUT_SHAPE variable, and the dtype to conform to your input shape specification
 3. Send your inputs as base64 encoded strings as such:
 ```python
 import numpy as np
