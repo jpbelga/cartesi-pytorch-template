@@ -13,6 +13,7 @@ logger.info(f"HTTP rollup_server url is {rollup_server}")
 
 # Load the ONNX model
 MODEL_INPUT_SHAPE = (1, 10)
+MODEL_DTYPE=np.float32
 model_path = "simple_nn.onnx"
 session = ort.InferenceSession(model_path)
 # Get the input and output names
@@ -35,7 +36,10 @@ def hex2str(hex):
 def handle_advance(data):
     logger.info(f"Received advance request data {data}")
     decoded_bytes = base64.b64decode(hex2str(data["payload"]))
-    outputs = session.run(output_names, {input_names[0]: np.frombuffer(decoded_bytes, dtype=np.float32).reshape(MODEL_INPUT_SHAPE)})
+
+    arr = np.frombuffer(decoded_bytes, dtype=MODEL_DTYPE).reshape(MODEL_INPUT_SHAPE).tolist()
+
+    outputs = session.run(output_names, {input_names[0]: arr})
     try:
         response = requests.post(
                 rollup_server + "/notice", json={"payload": str2hex(str({"modelOutputs": str(outputs)}))}
