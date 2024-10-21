@@ -7,7 +7,7 @@ The application entrypoint is the `dapp.py` file.
 1. Replace the simple_nn_model.pth file by the model you've trained.
 2. Ensure that the input shape matches the model requirements.
 
-A simple code of
+The placeholder model code as an example of exporting using TorchScript:
 ```python
 import torch
 import torch.nn as nn
