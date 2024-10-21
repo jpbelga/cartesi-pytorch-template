@@ -1,7 +1,7 @@
 from os import environ
 import base64
 import numpy as np
-import onnxruntime as ort
+import torch
 import logging
 import requests
 
@@ -11,14 +11,16 @@ logger = logging.getLogger(__name__)
 rollup_server = environ["ROLLUP_HTTP_SERVER_URL"]
 logger.info(f"HTTP rollup_server url is {rollup_server}")
 
-# Load the ONNX model
-model_path = "nn.onnx"
-session = ort.InferenceSession(model_path)
-input_names = [session.get_inputs()[0].name]
-output_names = [session.get_outputs()[0].name]
-# Get the input and output names
-MODEL_DTYPE=np.int64
-MODEL_INPUT_SHAPE = (1,)
+seed = 42
+torch.manual_seed(seed)
+
+# Load the saved TorchScript model
+loaded_model = torch.jit.load('simple_nn_model.pth')
+
+# Set the model to evaluation mode (optional but recommended)
+loaded_model.eval()
+logger.info("Model loaded properly")
+
 
 def str2hex(str):
     """
@@ -34,13 +36,19 @@ def hex2str(hex):
 
 def handle_advance(data):
     logger.info(f"Received advance request data {data}")
-    decoded_bytes = base64.b64decode(hex2str(data["payload"]))
+    
 
-    global arr
+    # Dummy input for inference (same shape as used for training)
+    test_inputs = torch.randn(10, 10)  # 10 samples, 10 features
+    logger.info(test_inputs)
+    # Perform inference
+    with torch.no_grad():
+        outputs = loaded_model(test_inputs)
 
-    arr = np.frombuffer(decoded_bytes, dtype=MODEL_DTYPE).reshape(MODEL_INPUT_SHAPE).tolist()
+    # Get the predicted class (assuming a classification problem)
+    predicted_classes = torch.argmax(outputs, dim=1)
+    logger.info(f"Predicted classes: {predicted_classes}")
 
-    outputs = session.run(output_names, {input_names[0]: arr})
     try:
         response = requests.post(
                     rollup_server + "/notice", json={"payload": str2hex(str({"modelOutputs": str(outputs[0][0])}))}
@@ -56,7 +64,6 @@ def handle_advance(data):
 
 def handle_inspect(data):
     logger.info(f"Received inspect request data {data}")
-    logger.info("global arr is:", arr)
     return "accept"
 
 

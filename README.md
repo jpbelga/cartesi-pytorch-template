@@ -4,21 +4,39 @@ This is a template for ONNX Cartesi DApps in python using the onnxruntime packag
 The application entrypoint is the `dapp.py` file.
 
 ## How to use it
-1. Replace the simple_nn.onnx file by the model you've trained
-2. Change the MODEL_INPUT_SHAPE variable, and the dtype to conform to your input shape specification
-3. Send your inputs as base64 encoded strings as such:
+1. Replace the simple_nn_model.pth file by the model you've trained.
+2. Ensure that the input shape matches the model requirements.
+
+A simple code of
 ```python
-import numpy as np
-import base64
+import torch
+import torch.nn as nn
 
-np.random.seed(42)
-# Create a (1, 10) random float32 numpy array
-arr = np.random.rand(1, 10).astype(np.float32)
+# Define a simple model class
+class SimpleNN(nn.Module):
+    def __init__(self):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(10, 50)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(50, 2)
 
-# Serialize to bytes and encode to a base64 string
-arr_bytes = arr.tobytes()
-encoded_str = base64.b64encode(arr_bytes).decode('utf-8')
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
 
-# Output the encoded string
-print(encoded_str)
+# Initialize and train your model (omitting training code for brevity)
+model = SimpleNN()
+
+# Dummy input for tracing
+dummy_input = torch.randn(1, 10)
+
+# Trace the model with dummy input
+traced_model = torch.jit.trace(model, dummy_input)
+
+# Save the traced model
+traced_model.save('simple_nn_model.pth')
+
+print("Model saved with TorchScript.")
+
 ```

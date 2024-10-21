@@ -16,16 +16,22 @@ apt-get update
 apt-get install -y --no-install-recommends \
   busybox-static=1:1.30.1-7ubuntu3 \
   libatomic1 \
-  libopenblas-dev
+  libopenblas-dev 
 rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 useradd --create-home --user-group dapp
 EOF
+
+COPY ./debs/*.deb .
+
+RUN apt-get install -y ./libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb
+
+RUN rm -rf ./libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
 
 WORKDIR /opt/cartesi/dapp
 COPY ./requirements.txt .
-COPY ./simple_nn.onnx .
+COPY ./simple_nn_model.pth .
 
 RUN <<EOF
 set -e
