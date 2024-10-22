@@ -21,11 +21,9 @@ rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 useradd --create-home --user-group dapp
 EOF
 
-COPY ./debs/*.deb .
-
-RUN apt-get install -y ./libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb
-
-RUN rm -rf ./libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb
+ADD https://github.com/jpbelga/riscv-debs/raw/refs/heads/main/libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb /
+RUN dpkg -i /libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb \
+  && rm /libgomp1_12.3.0-1ubuntu1~22.04_riscv64.deb
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
 

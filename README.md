@@ -1,6 +1,6 @@
 # ONNX DApp Template
 
-This is a template for ONNX Cartesi DApps in python using the onnxruntime package. It uses python3 to execute the backend application.
+This is a template for PyTorch Cartesi DApps in python. It uses python3 to execute the backend application.
 The application entrypoint is the `dapp.py` file.
 
 ## How to use it
